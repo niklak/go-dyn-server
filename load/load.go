@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	handleDir         = "handlers"
-	preMiddlewareDir  = "pre-middlewares"
-	postMiddlewareDir = "post-middlewares"
+	handleDir     = "handlers"
+	middlewareDir = "middlewares"
 )
 
 type PluginHandle struct {
@@ -21,9 +20,8 @@ type PluginHandle struct {
 }
 
 type ServerPlugins struct {
-	Handles         []PluginHandle
-	PreMiddlewares  []func(http.Handler) http.Handler
-	PostMiddlewares []func(http.Handler) http.Handler
+	Handles     []PluginHandle
+	Middlewares []func(http.Handler) http.Handler
 }
 
 func filePathWalkDir(root string) ([]string, error) {
@@ -119,19 +117,14 @@ func NewServerPlugins(root string) (serverPlugins ServerPlugins, err error) {
 		return
 	}
 
-	preMiddlewares, err := listMiddlewares(path.Join(root, preMiddlewareDir))
+	preMiddlewares, err := listMiddlewares(path.Join(root, middlewareDir))
 	if err != nil {
 		return
 	}
 
-	postMiddlewares, err := listMiddlewares(path.Join(root, postMiddlewareDir))
-	if err != nil {
-		return
-	}
 	serverPlugins = ServerPlugins{
-		Handles:         handles,
-		PreMiddlewares:  preMiddlewares,
-		PostMiddlewares: postMiddlewares,
+		Handles:     handles,
+		Middlewares: preMiddlewares,
 	}
 	return
 }

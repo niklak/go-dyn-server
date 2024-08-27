@@ -28,12 +28,8 @@ type config struct {
 
 func setupPluginHandles(r chi.Router, serverPlugins *load.ServerPlugins) {
 
-	for _, pre := range serverPlugins.PreMiddlewares {
+	for _, pre := range serverPlugins.Middlewares {
 		r.Use(pre)
-	}
-
-	for _, post := range serverPlugins.PostMiddlewares {
-		r.Use(post)
 	}
 
 	for _, pluginHandle := range serverPlugins.Handles {
@@ -63,7 +59,7 @@ func main() {
 
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
-	log.Printf("[INFO] %s: \n", os.Getenv("GOARCH"))
+	log.Printf("[INFO] GOOS: %s, GOARCH: %s\n", os.Getenv("GOOS"), os.Getenv("GOARCH"))
 
 	r := chi.NewRouter()
 
