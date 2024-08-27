@@ -28,6 +28,14 @@ type config struct {
 
 func setupPluginHandles(r chi.Router, serverPlugins *load.ServerPlugins) {
 
+	for _, pre := range serverPlugins.PreMiddlewares {
+		r.Use(pre)
+	}
+
+	for _, post := range serverPlugins.PostMiddlewares {
+		r.Use(post)
+	}
+
 	for _, pluginHandle := range serverPlugins.Handles {
 		for _, method := range pluginHandle.Methods {
 			r.MethodFunc(method, pluginHandle.Route, pluginHandle.Handle)
@@ -58,10 +66,6 @@ func main() {
 	log.Printf("[INFO] %s: \n", os.Getenv("GOARCH"))
 
 	r := chi.NewRouter()
-
-	r.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, http.StatusText(http.StatusNotImplemented), http.StatusNotImplemented)
-	})
 
 	setupPluginHandles(r, &serverPlugins)
 

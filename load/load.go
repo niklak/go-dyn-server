@@ -3,10 +3,15 @@ package load
 import (
 	"errors"
 	"net/http"
-	"os"
 	"path"
 	"path/filepath"
 	"plugin"
+)
+
+const (
+	handleDir         = "handlers"
+	preMiddlewareDir  = "pre-middlewares"
+	postMiddlewareDir = "post-middlewares"
 )
 
 type PluginHandle struct {
@@ -22,13 +27,8 @@ type ServerPlugins struct {
 }
 
 func filePathWalkDir(root string) ([]string, error) {
-	var files []string
-	err := filepath.Walk(root, func(fpath string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			files = append(files, fpath)
-		}
-		return nil
-	})
+
+	files, err := filepath.Glob(path.Join(root, "*.so"))
 	return files, err
 }
 
@@ -68,7 +68,11 @@ func readHandle(fp string) (ph PluginHandle, err error) {
 	return
 }
 
-func listHandles(files []string) (handles []PluginHandle, err error) {
+func listHandles(root string) (handles []PluginHandle, err error) {
+	files, err := filePathWalkDir(root)
+	if err != nil {
+		return
+	}
 	for _, fp := range files {
 		handle, err := readHandle(fp)
 		if err != nil {
@@ -80,16 +84,55 @@ func listHandles(files []string) (handles []PluginHandle, err error) {
 	return
 }
 
-func NewServerPlugins(root string) (serverPlugins ServerPlugins, err error) {
-	handlersPath := path.Join(root, "handlers")
+func readMiddleware(fp string) (pm func(http.Handler) http.Handler, err error) {
+	p, err := plugin.Open(fp)
+	if err != nil {
+		return
+	}
+	rawMiddleware, err := p.Lookup("Middleware")
+	if err != nil {
+		return
+	}
+	pm = rawMiddleware.(func(http.Handler) http.Handler)
+	return
+}
 
-	files, err := filePathWalkDir(handlersPath)
+func listMiddlewares(root string) (middlewares []func(http.Handler) http.Handler, err error) {
+	files, err := filePathWalkDir(root)
+	if err != nil {
+		return
+	}
+	for _, fp := range files {
+		middleware, err := readMiddleware(fp)
+		if err != nil {
+			return nil, err
+		}
+		middlewares = append(middlewares, middleware)
+	}
+	return
+}
+
+func NewServerPlugins(root string) (serverPlugins ServerPlugins, err error) {
+
+	handles, err := listHandles(path.Join(root, handleDir))
 	if err != nil {
 		return
 	}
 
-	serverPlugins = ServerPlugins{}
-	serverPlugins.Handles, err = listHandles(files)
+	preMiddlewares, err := listMiddlewares(path.Join(root, preMiddlewareDir))
+	if err != nil {
+		return
+	}
+
+	postMiddlewares, err := listMiddlewares(path.Join(root, postMiddlewareDir))
+	if err != nil {
+		return
+	}
+	serverPlugins = ServerPlugins{
+		Handles:         handles,
+		PreMiddlewares:  preMiddlewares,
+		PostMiddlewares: postMiddlewares,
+	}
 	return
 }
 

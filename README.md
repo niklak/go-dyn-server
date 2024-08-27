@@ -5,7 +5,10 @@ It is an extended example web server written in Go with support of dynamic libs.
 ## Building plugins
 
 ```bash
+# http.Handle
  go build -buildmode=plugin -o include/handlers/ip.so ./plugins/handlers/ip
+ # Pre-Middleware
+ go build -buildmode=plugin -o include/pre-middlewares/cors.so ./plugins/pre-middlewares/cors
 ```
 or
 
