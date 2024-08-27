@@ -1,4 +1,4 @@
-package main
+package load
 
 import (
 	"errors"
@@ -32,7 +32,7 @@ func filePathWalkDir(root string) ([]string, error) {
 	return files, err
 }
 
-func loadHandle(fp string) (ph PluginHandle, err error) {
+func readHandle(fp string) (ph PluginHandle, err error) {
 	p, err := plugin.Open(fp)
 	if err != nil {
 		return
@@ -68,10 +68,9 @@ func loadHandle(fp string) (ph PluginHandle, err error) {
 	return
 }
 
-func loadHandles(files []string) (handles []PluginHandle, err error) {
-	handles = []PluginHandle{}
+func listHandles(files []string) (handles []PluginHandle, err error) {
 	for _, fp := range files {
-		handle, err := loadHandle(fp)
+		handle, err := readHandle(fp)
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +80,7 @@ func loadHandles(files []string) (handles []PluginHandle, err error) {
 	return
 }
 
-func loadPlugins(root string) (serverPlugins ServerPlugins, err error) {
+func NewServerPlugins(root string) (serverPlugins ServerPlugins, err error) {
 	handlersPath := path.Join(root, "handlers")
 
 	files, err := filePathWalkDir(handlersPath)
@@ -90,7 +89,7 @@ func loadPlugins(root string) (serverPlugins ServerPlugins, err error) {
 	}
 
 	serverPlugins = ServerPlugins{}
-	serverPlugins.Handles, err = loadHandles(files)
+	serverPlugins.Handles, err = listHandles(files)
 	return
 }
 

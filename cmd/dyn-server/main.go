@@ -12,6 +12,7 @@ import (
 
 	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
+	"github.com/niklak/go-dyn-server/load"
 )
 
 const logPrefix string = "DYN-SERVER"
@@ -25,7 +26,7 @@ type config struct {
 	PluginRoot   string        `env:"PLUGIN_ROOT"`
 }
 
-func setupPluginHandles(r chi.Router, serverPlugins *ServerPlugins) {
+func setupPluginHandles(r chi.Router, serverPlugins *load.ServerPlugins) {
 
 	for _, pluginHandle := range serverPlugins.Handles {
 		for _, method := range pluginHandle.Methods {
@@ -45,7 +46,7 @@ func main() {
 
 	log.Printf("[INFO] %s: CONFIG: %+v\n", logPrefix, cfg)
 
-	serverPlugins, err := loadPlugins(cfg.PluginRoot)
+	serverPlugins, err := load.NewServerPlugins(cfg.PluginRoot)
 	if err != nil {
 		log.Fatalf("[ERROR] %s: %v\n", logPrefix, err)
 	}
@@ -53,6 +54,8 @@ func main() {
 	stop := make(chan os.Signal, 1)
 
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	log.Printf("[INFO] %s: \n", os.Getenv("GOARCH"))
 
 	r := chi.NewRouter()
 
