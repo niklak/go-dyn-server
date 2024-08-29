@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 
 const logPrefix string = "DYN-SERVER"
 
+var setupHandles func(r chi.Router, serverPlugins *load.ServerPlugins)
+
 type config struct {
 	Host         string        `env:"HOST"`
 	Port         int           `env:"PORT" envDefault:"8080"`
@@ -24,19 +27,6 @@ type config struct {
 	ReadTimeout  time.Duration `env:"READ_TIMEOUT" envDefault:"120s"`
 	WriteTimeout time.Duration `env:"WRITE_TIMEOUT" envDefault:"120s"`
 	PluginRoot   string        `env:"PLUGIN_ROOT"`
-}
-
-func setupPluginHandles(r chi.Router, serverPlugins *load.ServerPlugins) {
-
-	for _, pre := range serverPlugins.Middlewares {
-		r.Use(pre)
-	}
-
-	for _, pluginHandle := range serverPlugins.Handles {
-		for _, method := range pluginHandle.Methods {
-			r.MethodFunc(method, pluginHandle.Route, pluginHandle.Handle)
-		}
-	}
 }
 
 func main() {
@@ -59,11 +49,11 @@ func main() {
 
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
-	log.Printf("[INFO] GOOS: %s, GOARCH: %s\n", os.Getenv("GOOS"), os.Getenv("GOARCH"))
+	log.Printf("[INFO] GOOS: %s, GOARCH: %s\n", runtime.GOOS, runtime.GOARCH)
 
 	r := chi.NewRouter()
 
-	setupPluginHandles(r, &serverPlugins)
+	setupHandles(r, &serverPlugins)
 
 	chi.Walk(r, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
 		log.Printf("[INFO][%s]: '%s' has %d middlewares\n", method, route, len(middlewares))

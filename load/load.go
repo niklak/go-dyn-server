@@ -2,10 +2,12 @@ package load
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"path"
 	"path/filepath"
 	"plugin"
+	"runtime"
 )
 
 const (
@@ -25,8 +27,8 @@ type ServerPlugins struct {
 }
 
 func filePathWalkDir(root string) ([]string, error) {
-
-	files, err := filepath.Glob(path.Join(root, "*.so"))
+	libPat := fmt.Sprintf("*%s-%s.so", runtime.GOOS, runtime.GOARCH)
+	files, err := filepath.Glob(path.Join(root, libPat))
 	return files, err
 }
 

@@ -8,7 +8,7 @@ import (
 
 var Route = "/headers"
 
-var Methods = []string{"GET", "HEAD", "POST"}
+var Methods = []string{"GET"}
 
 // HeadersResponse is the response for the headers endpoint
 type HeadersResponse struct {
