@@ -4,7 +4,7 @@ services:
   server:
     build:
       context: ../
-      dockerfile: deploy/Dockerfile.alpine
+      dockerfile: deploy/Dockerfile
     
     restart: unless-stopped
     stop_signal: SIGINT
@@ -13,4 +13,4 @@ services:
     volumes:
       - "../include:/include"
     environment:
-      - SERVER_PLUGIN_ROOT=/onclude
+      - SERVER_PLUGIN_ROOT=/include
