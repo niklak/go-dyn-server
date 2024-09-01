@@ -1,0 +1,16 @@
+name: dyn-server
+
+services:
+  server:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.alpine
+    
+    restart: unless-stopped
+    stop_signal: SIGINT
+    ports:
+      - :8080:8080
+    volumes:
+      - "../include:/include"
+    environment:
+      - SERVER_PLUGIN_ROOT=/onclude

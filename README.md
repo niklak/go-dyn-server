@@ -2,6 +2,15 @@
 
 It is an extended example web server written in Go with support of dynamic libs.
 
+## Important
+To use go plugins there are some requirements:
+- GOOS and GOARCH of the plugin must match the GOOS and GOARCH of the runtime of the program that loads the plugin.
+- The plugin must be compiled with the same version of Go as the runtime (GOVERSION).
+- I assume that gcc must be also the same version for plugins and application. If you using alpine image, plugins must be compiled also with alpine image.
+- Plugins built with go1.22.1 does not work within go1.23.0 runtime.
+
+So, not only you need to keep plugins matching GOOS, GOARCH, but GOVERSION (or toolchain) but also gcc version. Of course it can be automated, but it can be messy.
+
 ## Building plugins
 
 ```bash
@@ -72,3 +81,4 @@ Static
  |Static|435.24us|601.95us|18.95ms|87.53%|29.06k|2.57k|38.19k|68.44%|
  |Dynamic|441.52us|580.51us|12.41ms|86.93%|28.19k|2.44k|38.81k|67.71%|
 
+Right now it is not pretty convenient.

@@ -130,5 +130,3 @@ func NewServerPlugins(root string) (serverPlugins ServerPlugins, err error) {
 	}
 	return
 }
-
-//TODO: add a web handler that accepts a handler

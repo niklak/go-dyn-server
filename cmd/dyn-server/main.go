@@ -31,6 +31,7 @@ type config struct {
 
 func main() {
 	var err error
+	log.Printf("[INFO] GOOS: %s, GOARCH: %s\n", runtime.GOOS, runtime.GOARCH)
 
 	cfg := config{}
 	opts := env.Options{Prefix: "SERVER_"}
@@ -48,8 +49,6 @@ func main() {
 	stop := make(chan os.Signal, 1)
 
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-
-	log.Printf("[INFO] GOOS: %s, GOARCH: %s\n", runtime.GOOS, runtime.GOARCH)
 
 	r := chi.NewRouter()
 
