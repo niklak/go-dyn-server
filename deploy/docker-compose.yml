@@ -4,13 +4,13 @@ services:
   server:
     build:
       context: ../
-      dockerfile: deploy/Dockerfile
+      dockerfile: deploy/alpine.Dockerfile
     
     restart: unless-stopped
     stop_signal: SIGINT
     ports:
       - :8080:8080
-    volumes:
-      - "../include:/include"
+    #volumes:
+      #- "../include:/include"
     environment:
       - SERVER_PLUGIN_ROOT=/include
