@@ -1,0 +1,25 @@
+{
+    // These tasks will run in order when initializing your CodeSandbox project.
+    "setupTasks": [
+      {
+        "name": "build plugins",
+        "command": "bash build-plugins.sh"
+      },
+      {
+        "name": "build binary",
+        "command": "cd cmd/dyn-server && go build -o dyn-server.run ."
+      }
+    ],
+  
+    // These tasks can be run from CodeSandbox. Running one will open a log in the app.
+    "tasks": {
+      "c": {
+        "name": "run server",
+        "command": "./cmd/dyn-server/dyn-server.run",
+        "runAtStart": true,
+        "preview": {
+          "port": 8080
+        }
+      }
+    }
+  }
